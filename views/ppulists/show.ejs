@@ -5,20 +5,19 @@
 <h3>Ppu Post</h3>
 </div>
     <div class="card col-6 offset-2 show-card">
-        <img 
-        src="<%= ppulist.image %>" 
+       <% if (ppulist.image) { %>
+    <img 
+        src="<%= typeof ppulist.image === 'string' ? ppulist.image : ppulist.image.url %>" 
         class="card-img-top show-img" 
-        alt="ppulist_image"
-        />
-        <!-- <div class="card-body"> 
-            <p class="card-text">
-                <b><%= ppulist.title %></b> <br>
-                <%= ppulist.description %> <br>
-                <strong>Posted By:</strong> <%= ppulist.postedBy %> <br>
-                <strong>Time:</strong> <%= ppulist.time ? new Date(ppulist.time).toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) : "No Time Available" %> <br>
-            </p>
-            
-        </div> -->
+        alt="Notice image"
+        onerror="this.style.display='none'"
+    />
+<% } else { %>
+    <div class="card-img-top show-img bg-light d-flex align-items-center justify-content-center">
+        <i class="bi bi-image fs-1 text-muted"></i>
+    </div>
+<% } %>
+        
 
         <div class="card-body"> 
             <p class="card-text">
