@@ -1,0 +1,24 @@
+<!-- Below your existing content
+<div class="row mt-4">
+    <div class="col-8 offset-2 text-center">
+        <% if (currentPage === 1 && hasNextPage) { %>
+            <a href="/ppulists?page=2" class="btn btn-primary">
+                Load More Posts
+            </a>
+        <% } else if (currentPage > 1) { %>
+            <div class="pagination-controls">
+                <% if (hasPrevPage) { %>
+                    <a href="/ppulists?page=<%= currentPage - 1 %>" class="btn btn-outline-primary me-2">
+                        &laquo; Previous Page
+                    </a>
+                <% } %>
+                
+                <% if (hasNextPage) { %>
+                    <a href="/ppulists?page=<%= currentPage + 1 %>" class="btn btn-outline-primary">
+                        Next Page &raquo;
+                    </a>
+                <% } %>
+            </div>
+        <% } %>
+    </div>
+</div> -->

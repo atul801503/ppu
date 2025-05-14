@@ -1,0 +1,95 @@
+<nav class="navbar navbar-expand-lg bg-info navbar-light sticky-top">
+    <div class="container-fluid">
+        <!-- Brand/Logo -->
+        <div class="photo-nav-container me-3">
+            <a href="/ppulists" class="photo-nav-link">
+                <img src="<%= '/images/ppuhomephoto.jpg' %>" 
+                     alt="PPU Home Photo"
+                     class="photo-nav-image">
+            </a>
+        </div>
+
+        <!-- Toggler Button -->
+        <button 
+            class="navbar-toggler" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Search Form (visible on larger screens) -->
+        <form class="d-none d-lg-flex mx-3 flex-grow-1" role="search" id="searchForm">
+            <input 
+                id="searchInput"
+                class="form-control me-2 search-inp" 
+                type="search" 
+                placeholder="Search destination"
+                name="query"
+            />
+            <button class="btn search-btn" type="submit">
+                <i class="fa-solid fa-magnifying-glass-location"></i> Search
+            </button>
+        </form>
+
+        <!-- Collapsible Content -->
+        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+            <!-- Search Form (visible on mobile) -->
+            <form class="d-lg-none my-2 w-100" role="search" id="mobileSearchForm">
+                <div class="input-group">
+                    <input 
+                        id="mobileSearchInput"
+                        class="form-control search-inp" 
+                        type="search" 
+                        placeholder="Search destination"
+                        name="query"
+                    />
+                    <button class="btn search-btn" type="submit">
+                        <i class="fa-solid fa-magnifying-glass-location"></i>
+                    </button>
+                </div>
+            </form>
+
+            <!-- Navigation Links -->
+            <div class="navbar-nav">
+                <a class="nav-link" href="/ppulists/newpost">Add New Post</a>
+            </div>
+
+            <!-- Auth Links -->
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/login">Login</a>
+                <a class="nav-link" href="/signup">Sign Up</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Handle both search forms
+    document.getElementById("searchForm")?.addEventListener("submit", handleSearch);
+    document.getElementById("mobileSearchForm")?.addEventListener("submit", handleSearch);
+
+    async function handleSearch(event) {
+        event.preventDefault();
+        const form = event.target;
+        const query = (form.id === "searchForm" 
+                      ? document.getElementById("searchInput")
+                      : document.getElementById("mobileSearchInput")).value.trim();
+        
+        if (!query) {
+            alert("Please enter a destination to search.");
+            return;
+        }
+
+        try {
+            console.log("Initiating search for:", query);
+            window.location.href = `/search?q=${encodeURIComponent(query)}`;
+        } catch (err) {
+            console.error("Search error:", err);
+            alert("Search failed. Please try again.");
+        }
+    }
+</script>

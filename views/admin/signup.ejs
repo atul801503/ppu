@@ -1,0 +1,90 @@
+<% layout("ppulayouts/ppuboilerplate", {
+    title: title || 'Create New Account - Admin',
+    styles: `
+        :root {
+            --admin-primary: #2c3e50;
+            --admin-danger: #e74c3c;
+        }
+        .admin-signup-card {
+            max-width: 500px;
+            border: 0;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .permission-badge {
+            font-size: 0.75rem;
+        }
+    `
+}) %>
+
+<div class="container d-flex align-items-center min-vh-100">
+    <div class="card admin-signup-card mx-auto">
+        <div class="card-header bg-dark text-white">
+            <h4 class="mb-0">Create New Account</h4>
+            <small class="text-warning">Admin Access Required</small>
+        </div>
+        
+        <div class="card-body">
+            <% if (error) { %>
+                <div class="alert alert-danger"><%= error %></div>
+            <% } %>
+            
+            <% if (errors && errors.length > 0) { %>
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        <% errors.forEach(err => { %>
+                            <li><%= err.msg %></li>
+                        <% }) %>
+                    </ul>
+                </div>
+            <% } %>
+            
+            <form action="/admin/create-account" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                
+                <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="fullName" class="form-control" 
+                           value="<%= formData && formData.fullName || '' %>" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" class="form-control" 
+                           value="<%= formData && formData.email || '' %>" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="username" class="form-control" 
+                           value="<%= formData && formData.username || '' %>" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="password" class="form-control" minlength="8" required>
+                    <div class="form-text">Minimum 8 characters</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" name="confirmPassword" class="form-control" required>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="form-label">Account Type</label>
+                    <select name="role" class="form-select" required>
+                        <option value="">Select role</option>
+                        <option value="editor" <%= formData && formData.role === 'editor' ? 'selected' : '' %>>Editor</option>
+                        <option value="moderator" <%= formData && formData.role === 'moderator' ? 'selected' : '' %>>Moderator</option>
+                        <option value="admin" <%= formData && formData.role === 'admin' ? 'selected' : '' %>>Administrator</option>
+                    </select>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-dark">Create Account</button>
+                    <a href="/admin/dashboard" class="btn btn-outline-secondary">Back to Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

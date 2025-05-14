@@ -1,0 +1,153 @@
+<% layout("ppulayouts/ppuboilerplate") %>
+<div class="row mt-3">
+    <div class="col-8 offset-2">
+        <br><br/>
+    <h3>Create a New Post</h3>
+    <form method="POST" action="/ppulists" novalidate class="needs-validation">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title</label>
+            <input 
+            name="ppulist[title]" 
+            placeholder="Enter title" 
+            type="text" 
+            class="form-control" 
+            required >
+        </div>
+        
+        <div class="mb-3">
+            <label for="description" class="form-label">Description</label>
+            <textarea 
+            name="ppulist[description]" 
+            placeholder="Enter description" 
+            class="form-control" 
+            required></textarea>
+</div>
+        
+<div class="mb-3">
+    <label for="image" class="form-label">File Upload</label>
+    <input 
+    name="ppulist[image]" 
+    placeholder="Enter image URL/Link" 
+    class="form-control" 
+    type="text">
+</div>
+
+<div class="row">
+        <div class="mb-3 col-md-5">
+            <label for="postedBy" class="form-label">Posted By</label>
+            <input 
+            name="ppulist[postedBy]" 
+            placeholder="Enter Posted Name" 
+            type="rext" 
+            class="form-control" 
+            required>
+
+         </div>
+        <!-- <div class="mb-3 col-md-4">
+        <label for="time" class="form-label">Time & Date</label>
+        <input 
+        name="ppulist[time]" 
+        placeholder="Enter date and time" 
+        class="form-control" 
+        required 
+        type="datetime-local">
+       </div> -->
+
+       <div class="mb-3 col-md-6">
+        <label for="time" class="form-label">Time & Date</label>
+        <div class="input-group">
+            <input 
+                id="time"
+                name="ppulist[time]" 
+                class="form-control" 
+                required 
+                type="datetime-local"
+                max=""
+            >
+            <button class="btn btn-outline-secondary modern" type="button" id="setCurrentTime">
+                <i class="bi bi-clock"></i> Now
+              </button>
+            
+        </div>
+        <div class="mt-2 text-muted" id="timeDisplay"></div>
+    </div>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const timeInput = document.getElementById('time');
+        const setCurrentBtn = document.getElementById('setCurrentTime');
+        const confirmBtn = document.getElementById('confirmTime');
+        const timeDisplay = document.getElementById('timeDisplay');
+        
+        // Function to get current datetime in correct format
+        function getCurrentDateTime() {
+            const now = new Date();
+            return new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+                   .toISOString()
+                   .slice(0, 16);
+        }
+    
+        // Function to format datetime for display
+        function formatDisplayDateTime(isoString) {
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true
+            };
+            return new Date(isoString).toLocaleString(undefined, options);
+        }
+    
+        // Update both value and max attributes
+        function updateDateTime() {
+            const currentDateTime = getCurrentDateTime();
+            timeInput.max = currentDateTime;
+            timeDisplay.textContent = `Current: ${formatDisplayDateTime(currentDateTime)}`;
+        }
+    
+        // Set to current time
+        function setCurrentTime() {
+            timeInput.value = getCurrentDateTime();
+            updateDisplay();
+        }
+    
+        // Update the display below the input
+        function updateDisplay() {
+            if (timeInput.value) {
+                timeDisplay.textContent = `Selected: ${formatDisplayDateTime(timeInput.value)}`;
+            }
+        }
+    
+        // Initial setup
+        updateDateTime();
+        setCurrentTime(); // Set to current time by default
+        
+        // Event listeners
+        timeInput.addEventListener('change', updateDisplay);
+        setCurrentBtn.addEventListener('click', setCurrentTime);
+        confirmBtn.addEventListener('click', function() {
+            if (!timeInput.value) {
+                alert('Please select a date and time first');
+                return;
+            }
+            alert(`Time confirmed: ${formatDisplayDateTime(timeInput.value)}`);
+            // Add your confirmation logic here
+        });
+        
+        // Update every minute to keep current
+        setInterval(updateDateTime, 60000);
+    });
+    </script>
+    
+    <!-- Bootstrap Icons (add this in your head tag if not already included) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+    </div>
+        <button class="btn btn-warning">Submit Post.</button>  <!-- Submit button added -->
+        <br><br/>
+    </form>
+    <br>
+   </div>
+</div>
