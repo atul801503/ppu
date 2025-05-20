@@ -7,6 +7,8 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const wrapAsync = require("./utils/wrapAsync.js");
 const ExpressError = require("./utils/ExpressError.js");
+const session = require("express-session");
+
 
 
 // Mongoose data base connect 
@@ -30,6 +32,19 @@ app.use(express.urlencoded({ extended: true })); // To parse form data
 app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname,"/public")))
+
+const sessionOptions ={
+    secret: "mysupersecretcode",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        httpOnly: true,
+    },
+};
+app.use(session(sessionOptions));
+
 
 // API Working in site
 app.get("/", (req, res) => {
@@ -153,6 +168,7 @@ app.delete("/ppulists/:id", wrapAsync(async (req, res) => {
 // });
 
 
+
 app.all('*', (req, res, next) => {
     next(new ExpressError(404, "PPU Page Not Found"));
 });
@@ -165,6 +181,50 @@ app.use((err, req, res, next) => {
     res.status(statusCode).render("error.ejs", { message});
 //    res.status(statusCode).send(message);
 });
+
+// In your /api/search route
+app.get('/api/search', async (req, res) => {
+  try {
+    console.log("Received search query:", req.query.query);
+    const searchQuery = req.query.query.replace(/[^\w\s]/gi, '').trim();
+    console.log("Sanitized query:", searchQuery);
+
+    const results = await Listing.find({
+      $or: [
+        { title: { $regex: searchQuery, $options: 'i' } },
+        { location: { $regex: searchQuery, $options: 'i' } }
+      ]
+    }).lean();
+
+    console.log("Search results from DB:", results);
+    
+    if (!results.length) {
+      return res.status(404).json({
+        success: false,
+        message: "No results found",
+        data: []
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: results.length,
+      data: results
+    });
+
+  } catch (error) {
+    console.error("Search route error:", {
+      message: error.message,
+      stack: error.stack,
+      query: req.query.query
+    });
+    res.status(500).json({
+      success: false,
+      message: "Internal server error during search"
+    });
+  }
+});
+
 
 app.listen(8080, () => {
     console.log("ppu team is working is project");

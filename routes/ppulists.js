@@ -1,38 +1,39 @@
-// In your routes file (e.g., routes/ppulists.js)
-router.get('/', async (req, res) => {
+// In your route handler
+router.get('/ppulists', async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10; // Default 10 posts per page
+        const limit = 10; // Number of items per page
+        const skip = (page - 1) * limit;
         
-        // For first page, get all posts without pagination
-        if (page === 1) {
-            const ppulists = await Ppulist.find().sort({ time: -1 });
-            return res.render('ppulists/index', {
-                ppulists,
-                currentPage: page,
-                totalPages: 1, // Only show first page initially
-                hasNextPage: ppulists.length >= limit,
-                hasPrevPage: false
-            });
+        // Build query for search if needed
+        let query = {};
+        if (req.query.search) {
+            query = {
+                $or: [
+                    { title: { $regex: req.query.search, $options: 'i' } },
+                    { description: { $regex: req.query.search, $options: 'i' } }
+                ]
+            };
         }
         
-        // For subsequent pages, use normal pagination
-        const skip = (page - 1) * limit;
-        const totalPosts = await Ppulist.countDocuments();
-        const ppulists = await Ppulist.find()
-                                   .sort({ time: -1 })
-                                   .skip(skip)
-                                   .limit(limit);
-
+        // Get total count for pagination
+        const total = await Ppulist.countDocuments(query);
+        const totalPages = Math.ceil(total / limit);
+        
+        // Get paginated results
+        const allPpulists = await Ppulist.find(query)
+            .sort({ time: -1 })
+            .skip(skip)
+            .limit(limit);
+        
         res.render('ppulists/index', {
-            ppulists,
+            allPpulists,
             currentPage: page,
-            totalPages: Math.ceil(totalPosts / limit),
-            hasNextPage: (limit * page) < totalPosts,
-            hasPrevPage: page > 1
+            totalPages,
+            searchQuery: req.query.search
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).send('Server Error');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
     }
 });

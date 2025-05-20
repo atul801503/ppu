@@ -5,19 +5,26 @@
 <h3>Ppu Post</h3>
 </div>
     <div class="card col-6 offset-2 show-card">
-       <% if (ppulist.image) { %>
-    <img 
-        src="<%= typeof ppulist.image === 'string' ? ppulist.image : ppulist.image.url %>" 
-        class="card-img-top show-img" 
-        alt="Notice image"
-        onerror="this.style.display='none'"
-    />
+      <% if (ppulist.image) { %>
+    <div class="image-container position-relative">
+        <img 
+            src="<%= typeof ppulist.image === 'string' ? ppulist.image : ppulist.image.url %>" 
+            class="card-img-top show-img img-fluid" 
+            alt="Post image"
+            loading="lazy"
+            onerror="this.onerror=null;this.src='/images/default-placeholder.png';this.classList.add('placeholder-image')"
+        />
+        <% if (ppulist.image.caption) { %>
+            <div class="image-caption text-muted small mt-1">
+                <%= ppulist.image.caption %>
+            </div>
+        <% } %>
+    </div>
 <% } else { %>
-    <div class="card-img-top show-img bg-light d-flex align-items-center justify-content-center">
+    <div class="card-img-top show-img bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
         <i class="bi bi-image fs-1 text-muted"></i>
     </div>
 <% } %>
-        
 
         <div class="card-body"> 
             <p class="card-text">

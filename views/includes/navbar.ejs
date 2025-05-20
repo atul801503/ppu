@@ -1,12 +1,12 @@
 <nav class="navbar navbar-expand-lg bg-info navbar-light sticky-top">
     <div class="container-fluid">
         <!-- Brand/Logo -->
-        <div class="photo-nav-container me-3">
-            <a href="/ppulists" class="photo-nav-link">
-                <img src="<%= '/images/ppuhomephoto.jpg' %>" 
-                     alt="PPU Home Photo"
-                     class="photo-nav-image">
-            </a>
+        <div class="photo-nav-container me-3">             
+            <a href="/ppulists" class="photo-nav-link"> 
+                <img src="<%= '/images/ppuhomephoto.jpg' %>"                       
+                    alt="PPU Home Photo"                      
+                    class="photo-nav-image">             
+            </a>         
         </div>
 
         <!-- Toggler Button -->
@@ -14,82 +14,116 @@
             class="navbar-toggler" 
             type="button" 
             data-bs-toggle="collapse" 
-            data-bs-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup"
+            data-bs-target="#mainNavbar"
+            aria-controls="mainNavbar"
             aria-expanded="false"
             aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <!-- Search Form (visible on larger screens) -->
-        <form class="d-none d-lg-flex mx-3 flex-grow-1" role="search" id="searchForm">
-            <input 
-                id="searchInput"
-                class="form-control me-2 search-inp" 
-                type="search" 
-                placeholder="Search destination"
-                name="query"
-            />
-            <button class="btn search-btn" type="submit">
-                <i class="fa-solid fa-magnifying-glass-location"></i> Search
-            </button>
+        <form class="d-none d-lg-flex flex-grow-1 mx-3 search-form" role="search">
+            <div class="input-group has-validation">
+                <input 
+                    class="form-control me-2 search-inp" 
+                    type="search" 
+                    placeholder="Search destination..."
+                    name="query"
+                    aria-label="Search destinations"
+                    required
+                />
+                <button class="btn search-btn" type="submit">
+                    <i class="fa-solid fa-magnifying-glass-location"></i> 
+                    <span class="ms-1">Search</span>
+                </button>
+                <div class="invalid-feedback">Please enter a destination</div>
+            </div>
         </form>
 
         <!-- Collapsible Content -->
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="collapse navbar-collapse" id="mainNavbar">
             <!-- Search Form (visible on mobile) -->
-            <form class="d-lg-none my-2 w-100" role="search" id="mobileSearchForm">
-                <div class="input-group">
+            <form class="d-lg-none my-2 w-100 search-form" role="search">
+                <div class="input-group has-validation">
                     <input 
-                        id="mobileSearchInput"
                         class="form-control search-inp" 
                         type="search" 
-                        placeholder="Search destination"
+                        placeholder="Search destination..."
                         name="query"
+                        aria-label="Search destinations"
+                        required
                     />
                     <button class="btn search-btn" type="submit">
                         <i class="fa-solid fa-magnifying-glass-location"></i>
+                        <span class="visually-hidden">Search</span>
                     </button>
+                    <div class="invalid-feedback">Please enter a destination</div>
                 </div>
             </form>
 
             <!-- Navigation Links -->
-            <div class="navbar-nav">
-                <a class="nav-link" href="/ppulists/newpost">Add New Post</a>
-            </div>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/ppulists/newpost">
+                        <i class="fa-solid fa-plus me-1"></i>Add New Post
+                    </a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Categories
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                        <li><a class="dropdown-item" href="/categories/food">Food & Dining</a></li>
+                        <li><a class="dropdown-item" href="/categories/accommodation">Accommodation</a></li>
+                        <li><a class="dropdown-item" href="/categories/attractions">Attractions</a></li>
+                    </ul>
+                </li>
+            </ul>
 
             <!-- Auth Links -->
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/login">Login</a>
-                <a class="nav-link" href="/signup">Sign Up</a>
-            </div>
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="authDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fa-regular fa-user me-1"></i>Account
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="authDropdown">
+                        <li><a class="dropdown-item" href="/login"><i class="fa-solid fa-right-to-bracket me-2"></i>Login</a></li>
+                        <li><a class="dropdown-item" href="/signup"><i class="fa-solid fa-user-plus me-2"></i>Sign Up</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/profile"><i class="fa-solid fa-user me-2"></i>My Profile</a></li>
+                        <li><a class="dropdown-item" href="/settings"><i class="fa-solid fa-gear me-2"></i>Settings</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
 </nav>
 
 <script>
-    // Handle both search forms
-    document.getElementById("searchForm")?.addEventListener("submit", handleSearch);
-    document.getElementById("mobileSearchForm")?.addEventListener("submit", handleSearch);
-
-    async function handleSearch(event) {
-        event.preventDefault();
-        const form = event.target;
-        const query = (form.id === "searchForm" 
-                      ? document.getElementById("searchInput")
-                      : document.getElementById("mobileSearchInput")).value.trim();
-        
-        if (!query) {
-            alert("Please enter a destination to search.");
-            return;
-        }
-
-        try {
-            console.log("Initiating search for:", query);
+    // Handle search form submission for both desktop and mobile
+    document.querySelectorAll('.search-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const input = this.querySelector('.search-inp');
+            const query = input.value.trim();
+            
+            if (!query) {
+                // Show validation error
+                input.classList.add('is-invalid');
+                return;
+            }
+            
+            // Remove any previous validation
+            input.classList.remove('is-invalid');
+            
+            // Redirect to search results page
             window.location.href = `/search?q=${encodeURIComponent(query)}`;
-        } catch (err) {
-            console.error("Search error:", err);
-            alert("Search failed. Please try again.");
-        }
+        });
+    });
+
+    function showToast(message, type = "info") {
+        // Implement a toast notification system
+        console.log(`${type.toUpperCase()}: ${message}`);
+        // In a real implementation, you would show a visual notification
     }
 </script>

@@ -1,16 +1,79 @@
-<footer>
-    <div class="f-info">
-        <div class="f-info-socials">
-            <i class="fa-brands fa-telegram"></i>
-            <i class="fa-brands fa-whatsapp"></i>
-            <i class="fa-brands fa-instagram"></i>
-            <i class="fa-brands fa-x-twitter"></i>
+<footer class="bg-dark text-white pt-4 pb-2">
+    <div class="container">
+        <div class="row">
+            <!-- About Section -->
+            <div class="col-md-4 mb-4">
+                <h5 class="text-info">About PPU CHARCHA</h5>
+                <p>Your destination for finding and sharing great places around the world. Join our community of travelers and locals.</p>
+                <img src="<%= '/images/ppuhomephoto.jpg' %>" alt="PPU Logo" class="img-fluid" style="max-height: 80px;">
+            </div>
 
+            <!-- Quick Links -->
+            <div class="col-md-2 mb-4">
+                <h5 class="text-info">Quick Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="/ppulists" class="text-white text-decoration-none">Home</a></li>
+                    <li><a href="/ppulists/newpost" class="text-white text-decoration-none">Add New Post</a></li>
+                    <li><a href="/search" class="text-white text-decoration-none">Search</a></li>
+                    <li><a href="/login" class="text-white text-decoration-none">Login</a></li>
+                    <li><a href="/signup" class="text-white text-decoration-none">Sign Up</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="col-md-3 mb-4">
+                <h5 class="text-info">Contact Us</h5>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-envelope me-2"></i> pputeams@gmail.com</li>
+                    <li><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</li>
+                    <li><i class="fas fa-map-marker-alt me-2"></i> 123 Travel St, Explore City</li>
+                </ul>
+            </div>
+
+            <!-- Social Media -->
+            <div class="col-md-3 mb-4">
+                <h5 class="text-info">Follow Us</h5>
+                <div class="social-links">
+                    <a href="#" class="text-white me-3"><i class="fab fa-facebook-f fa-lg"></i></a>
+                    <a href="#" class="text-white me-3"><i class="fab fa-twitter fa-lg"></i></a>
+                    <a href="https://www.instagram.com/#" class="text-white me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                    <a href="#" class="text-white me-3"><i class="fab fa-linkedin-in fa-lg"></i></a>
+                    <a href="#" class="text-white"><i class="fab fa-youtube fa-lg"></i></a>
+                </div>
+                
+                <!-- Newsletter -->
+                <div class="mt-3">
+                    <h6 class="text-info">Subscribe to our newsletter</h6>
+                    <form class="form-inline">
+                        <div class="input-group">
+                            <input type="email" class="form-control" placeholder="Your email">
+                            <button class="btn btn-info" type="submit">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
-        <div class="f-info-brand">&copy;PPU Team Student Limited</div>
-        <div class="f-info-links">
-            <a href="/privay">Terms</a>
-            <a href="/terms">Terms</a>
+
+        <!-- Copyright -->
+        <div class="row pt-3 border-top border-secondary">
+            <div class="col-12 text-center">
+                <p class="small mb-0">&copy; 2025 PPU. All rights reserved.</p>
+            </div>
         </div>
     </div>
 </footer>
+
+<!-- Font Awesome for icons -->
+<script src="https://kit.fontawesome.com/your-code.js" crossorigin="anonymous"></script>
+
+<!-- Optional JavaScript for newsletter submission -->
+<script>
+    document.querySelector('.form-inline')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const email = this.querySelector('input[type="email"]').value;
+        if (email) {
+            alert('Thank you for subscribing!');
+            this.querySelector('input[type="email"]').value = '';
+        }
+    });
+</script>
