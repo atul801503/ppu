@@ -44,23 +44,24 @@ exports.updatePpulist = async (req, res) => {
     const { id } = req.params;
     const ppulistData = { ...req.body.ppulist };
 
+    console.log('Update request body:', req.body);
+    console.log('Parsed ppulist data:', ppulistData);
+    console.log('File upload:', req.file);
+
     // Get the existing post to check for file removal
     const existingPpulist = await Ppulist.findById(id);
     if (!existingPpulist) {
       throw new ExpressError(404, 'Post not found');
     }
 
-    // Handle file removal if checkbox is checked
-    if (ppulistData.removeFile && existingPpulist.image) {
-      // Delete the file from the filesystem if it exists
-      const filePath = path.join(__dirname, '../public', existingPpulist.image.url);
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
-      // Remove image data from the post
-      ppulistData.image = undefined;
-    } else if (req.file) {
+    // Check if the removeFile checkbox was checked
+    const shouldRemoveFile = ppulistData.removeFile === 'on' || ppulistData.removeFile === true;
+    console.log('Should remove file:', shouldRemoveFile);
+
+    // IMPORTANT: If a new file is uploaded, it takes precedence over the removeFile checkbox
+    if (req.file) {
       // If a new file is uploaded, update the image data
+      console.log('New file uploaded:', req.file.filename);
       ppulistData.image = {
         url: `/uploads/${req.file.filename}`,
         filename: req.file.filename
@@ -71,15 +72,37 @@ exports.updatePpulist = async (req, res) => {
         const oldFilePath = path.join(__dirname, '../public', existingPpulist.image.url);
         if (fs.existsSync(oldFilePath)) {
           fs.unlinkSync(oldFilePath);
+          console.log('Old file deleted');
         }
       }
+    }
+    // Only remove the file if no new file is uploaded AND the removeFile checkbox is checked
+    else if (shouldRemoveFile && existingPpulist.image) {
+      console.log('Removing existing file:', existingPpulist.image);
+      // Delete the file from the filesystem if it exists
+      if (existingPpulist.image.url) {
+        const filePath = path.join(__dirname, '../public', existingPpulist.image.url);
+        console.log('Attempting to delete file at:', filePath);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log('File deleted successfully');
+        } else {
+          console.log('File not found on disk');
+        }
+      }
+
+      // Set image to null in the database
+      ppulistData.image = null;
     } else {
       // If no new file and not removing, keep the existing image
+      console.log('No file changes, keeping existing image');
       delete ppulistData.image;
     }
 
     // Remove the removeFile property as it's not part of the schema
     delete ppulistData.removeFile;
+
+    console.log('Final update data:', ppulistData);
 
     // Update the post
     const updatedPpulist = await Ppulist.findByIdAndUpdate(
@@ -88,6 +111,7 @@ exports.updatePpulist = async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    console.log('Post updated successfully:', updatedPpulist);
     res.redirect(`/ppulists/${id}`);
   } catch (error) {
     console.error('Error updating post:', error);

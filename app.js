@@ -5,6 +5,7 @@ const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const ExpressError = require("./utils/ExpressError.js");
+const wrapAsync = require("./utils/wrapAsync.js");
 const session = require("express-session");
 const ppulistRoutes = require("./routes/ppulistRoutes");
 
@@ -80,89 +81,78 @@ app.use((err, req, res, next) => {
 //    res.status(statusCode).send(message);
 });
 
-app.get('/search', async(req, res)=>{
-  let input = req.query.q.trim().replace(/\s+/g, " ");
-  if (input == "" || input == " ") {
-    req.flash("error", "Please enter search query!");
-    res.redirect("/listings");
+app.get('/search', wrapAsync(async(req, res) => {
+  const Ppulist = require('./models/ppulist');
+
+  // Get the search query and clean it
+  let input = req.query.q ? req.query.q.trim().replace(/\s+/g, " ") : "";
+
+  if (input === "" || input === " ") {
+    // If no flash middleware is set up, just redirect
+    return res.redirect("/ppulists");
   }
 
+  // Format the search term with proper capitalization
+  let formattedInput = input.split(" ").map(word =>
+    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+  ).join(" ");
 
-  let data = input.split("");
-  let element = "";
-  let flag = false;
-  for (let index = 0; index < data.length; index++) {
-    if (index == 0 || flag) {
-      element = element + data[index].toUpperCase();
-    } else {
-      element = element + data[index].toLowerCase();
-    }
-    flag = data[index] == " ";
-  }
+  console.log('Searching for:', formattedInput);
 
-  let allListings = await Listing.find({
-    title: { $regex: element, $options: "i" },
-  });
-  if (allListings.length != 0) {
-    res.locals.success = "Listings searched by Title!";
-    res.render("listings/index.ejs", { allListings });
-    return;
-  }
+  // Search by title
+  let allPpulists = await Ppulist.find({
+    title: { $regex: formattedInput, $options: "i" }
+  }).sort({ time: -1 });
 
-  if (allListings.length == 0) {
-    allListings = await Listing.find({
-      category: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
-    if (allListings.length != 0) {
-      res.locals.success = "Listings searched by Category!";
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
-  }
-  if (allListings.length == 0) {
-    allListings = await Listing.find({
-      country: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
-    if (allListings.length != 0) {
-      res.locals.success = "Listings searched by Country!";
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
-  }
-
-  if (allListings.length == 0) {
-    allListings = await Listing.find({
-      location: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
-    if (allListings.length != 0) {
-      res.locals.success = "Listings searched by Location!";
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
-  }
-
-  const intValue = parseInt(element, 10);
-  const intDec = Number.isInteger(intValue);
-
-  if (allListings.length == 0 && intDec) {
-    allListings = await Listing.find({ price: { $lte: element } }).sort({
-      price: 1,
+  if (allPpulists.length > 0) {
+    console.log(`Found ${allPpulists.length} results by title`);
+    return res.render("ppulists/index.ejs", {
+      allPpulists,
+      searchMessage: `Search results for "${input}" by title`,
+      searchQuery: input
     });
-    if (allListings.length != 0) {
-      res.locals.success = `Listings searched by price less than Rs ${element}!`;
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
   }
-  if (allListings.length == 0) {
-    req.flash("error", "No listings found based on your search!");
-    res.redirect("/listings");
+
+  // Search by description
+  allPpulists = await Ppulist.find({
+    description: { $regex: formattedInput, $options: "i" }
+  }).sort({ time: -1 });
+
+  if (allPpulists.length > 0) {
+    console.log(`Found ${allPpulists.length} results by description`);
+    return res.render("ppulists/index.ejs", {
+      allPpulists,
+      searchMessage: `Search results for "${input}" by description`,
+      searchQuery: input
+    });
   }
-})
+
+  // Search by postedBy
+  allPpulists = await Ppulist.find({
+    postedBy: { $regex: formattedInput, $options: "i" }
+  }).sort({ time: -1 });
+
+  if (allPpulists.length > 0) {
+    console.log(`Found ${allPpulists.length} results by posted by`);
+    return res.render("ppulists/index.ejs", {
+      allPpulists,
+      searchMessage: `Search results for "${input}" by posted by`,
+      searchQuery: input
+    });
+  }
+
+  // If no results found
+  console.log('No results found');
+  return res.render("ppulists/index.ejs", {
+    allPpulists: [],
+    searchMessage: `No results found for "${input}"`,
+    searchQuery: input
+  });
+}))
 
 
 
 
-app.listen(8080, () => {
-    console.log("ppu team is working is project");
+app.listen(8081, () => {
+    console.log("ppu team is working is project on port 8081");
 });
