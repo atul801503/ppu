@@ -182,48 +182,87 @@ app.use((err, req, res, next) => {
 //    res.status(statusCode).send(message);
 });
 
-// In your /api/search route
-app.get('/api/search', async (req, res) => {
-  try {
-    console.log("Received search query:", req.query.query);
-    const searchQuery = req.query.query.replace(/[^\w\s]/gi, '').trim();
-    console.log("Sanitized query:", searchQuery);
-
-    const results = await Listing.find({
-      $or: [
-        { title: { $regex: searchQuery, $options: 'i' } },
-        { location: { $regex: searchQuery, $options: 'i' } }
-      ]
-    }).lean();
-
-    console.log("Search results from DB:", results);
-    
-    if (!results.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No results found",
-        data: []
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      count: results.length,
-      data: results
-    });
-
-  } catch (error) {
-    console.error("Search route error:", {
-      message: error.message,
-      stack: error.stack,
-      query: req.query.query
-    });
-    res.status(500).json({
-      success: false,
-      message: "Internal server error during search"
-    });
+app.get('/search', async(req, res)=>{
+  let input = req.query.q.trim().replace(/\s+/g, " ");
+  if (input == "" || input == " ") {
+    req.flash("error", "Please enter search query!");
+    res.redirect("/listings");
   }
-});
+  
+
+  let data = input.split("");
+  let element = "";
+  let flag = false;
+  for (let index = 0; index < data.length; index++) {
+    if (index == 0 || flag) {
+      element = element + data[index].toUpperCase();
+    } else {
+      element = element + data[index].toLowerCase();
+    }
+    flag = data[index] == " ";
+  }
+
+  let allListings = await Listing.find({
+    title: { $regex: element, $options: "i" },
+  });
+  if (allListings.length != 0) {
+    res.locals.success = "Listings searched by Title!";
+    res.render("listings/index.ejs", { allListings });
+    return;
+  }
+
+  if (allListings.length == 0) {
+    allListings = await Listing.find({
+      category: { $regex: element, $options: "i" },
+    }).sort({ _id: -1 });
+    if (allListings.length != 0) {
+      res.locals.success = "Listings searched by Category!";
+      res.render("listings/index.ejs", { allListings });
+      return;
+    }
+  }
+  if (allListings.length == 0) {
+    allListings = await Listing.find({
+      country: { $regex: element, $options: "i" },
+    }).sort({ _id: -1 });
+    if (allListings.length != 0) {
+      res.locals.success = "Listings searched by Country!";
+      res.render("listings/index.ejs", { allListings });
+      return;
+    }
+  }
+
+  if (allListings.length == 0) {
+    allListings = await Listing.find({
+      location: { $regex: element, $options: "i" },
+    }).sort({ _id: -1 });
+    if (allListings.length != 0) {
+      res.locals.success = "Listings searched by Location!";
+      res.render("listings/index.ejs", { allListings });
+      return;
+    }
+  }
+
+  const intValue = parseInt(element, 10);
+  const intDec = Number.isInteger(intValue);
+
+  if (allListings.length == 0 && intDec) {
+    allListings = await Listing.find({ price: { $lte: element } }).sort({
+      price: 1,
+    });
+    if (allListings.length != 0) {
+      res.locals.success = `Listings searched by price less than Rs ${element}!`;
+      res.render("listings/index.ejs", { allListings });
+      return;
+    }
+  }
+  if (allListings.length == 0) {
+    req.flash("error", "No listings found based on your search!");
+    res.redirect("/listings");
+  }
+})
+  
+
 
 
 app.listen(8080, () => {
