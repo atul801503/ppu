@@ -7,22 +7,29 @@
             <% if (locals.searchMessage) { %>
                 <div class="alert alert-info">
                     <%= searchMessage %>
+
+                    <% if (locals.suggestions && suggestions.length > 0) { %>
+                        <div class="mt-2">
+                            <p><strong>Did you mean:</strong></p>
+                            <ul class="list-unstyled">
+                                <% suggestions.forEach(suggestion => { %>
+                                    <li>
+                                        <a href="/search?q=<%= encodeURIComponent(suggestion) %>" class="text-primary">
+                                            <%= suggestion %>
+                                        </a>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        </div>
+                    <% } %>
                 </div>
             <% } %>
         </div>
         <div class="col-md-6">
-            <form action="/search" method="GET" class="d-flex">
-                <input
-                    type="text"
-                    name="q"
-                    class="form-control me-2"
-                    placeholder="Search posts..."
-                    value="<%= locals.searchQuery || '' %>"
-                >
-                <button type="submit" class="btn btn-primary">Search</button>
-            </form>
-            <div class="mt-2">
-                <a href="/ppulists/newpost" class="btn btn-success">Create New Post</a>
+            <div class="text-end">
+                <a href="/ppulists/newpost" class="btn btn-success">
+                    <i class="bi bi-plus-circle me-1"></i> Create New Post
+                </a>
             </div>
         </div>
     </div>

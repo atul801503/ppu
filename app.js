@@ -53,6 +53,52 @@ app.get("/", (req, res) => {
 // Use the ppulist routes
 app.use("/ppulists", ppulistRoutes);
 
+// API endpoint to get search suggestions
+app.get('/api/search-suggestions', wrapAsync(async (req, res) => {
+  const Ppulist = require('./models/ppulist');
+  const query = req.query.q ? req.query.q.trim() : '';
+
+  if (!query || query.length < 1) {
+    return res.json([]);
+  }
+
+  try {
+    // Find posts with titles that match the query
+    const titleMatches = await Ppulist.find({
+      title: { $regex: query, $options: 'i' }
+    })
+    .sort({ time: -1 })
+    .limit(10)
+    .select('title _id');
+
+    // Format the results
+    const suggestions = titleMatches.map(post => ({
+      id: post._id.toString(),
+      title: post.title
+    }));
+
+    // Add search modifiers if we have results
+    if (suggestions.length > 0 && query.length > 2) {
+      suggestions.push({
+        id: 'modifier-title',
+        title: `${query} in title`,
+        isModifier: true
+      });
+
+      suggestions.push({
+        id: 'modifier-description',
+        title: `${query} in description`,
+        isModifier: true
+      });
+    }
+
+    res.json(suggestions);
+  } catch (error) {
+    console.error('Error fetching search suggestions:', error);
+    res.status(500).json({ error: 'Failed to fetch suggestions' });
+  }
+}));
+
 
 
 
@@ -92,62 +138,113 @@ app.get('/search', wrapAsync(async(req, res) => {
     return res.redirect("/ppulists");
   }
 
-  // Format the search term with proper capitalization
-  let formattedInput = input.split(" ").map(word =>
-    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  ).join(" ");
+  console.log('Searching for:', input);
 
-  console.log('Searching for:', formattedInput);
+  try {
+    let searchQuery = {};
+    let searchType = "all fields";
 
-  // Search by title
-  let allPpulists = await Ppulist.find({
-    title: { $regex: formattedInput, $options: "i" }
-  }).sort({ time: -1 });
+    // Check for "in title" or "in description" modifiers
+    if (input.toLowerCase().endsWith(" in title")) {
+      // Search only in title
+      const actualQuery = input.slice(0, -9).trim(); // Remove " in title"
+      searchQuery = { title: { $regex: actualQuery, $options: "i" } };
+      searchType = "title";
+      input = actualQuery; // Update input for display purposes
+    } else if (input.toLowerCase().endsWith(" in description")) {
+      // Search only in description
+      const actualQuery = input.slice(0, -15).trim(); // Remove " in description"
+      searchQuery = { description: { $regex: actualQuery, $options: "i" } };
+      searchType = "description";
+      input = actualQuery; // Update input for display purposes
+    } else {
+      // Search across all fields
+      searchQuery = {
+        $or: [
+          { title: { $regex: input, $options: "i" } },
+          { description: { $regex: input, $options: "i" } },
+          { postedBy: { $regex: input, $options: "i" } }
+        ]
+      };
+    }
 
-  if (allPpulists.length > 0) {
-    console.log(`Found ${allPpulists.length} results by title`);
+    // Execute the search
+    let allPpulists = await Ppulist.find(searchQuery).sort({ time: -1 });
+
+    console.log(`Found ${allPpulists.length} results for "${input}" in ${searchType}`);
+
+    // Get some search suggestions based on existing data
+    let suggestions = [];
+    if (allPpulists.length === 0) {
+      // Add search modifiers as suggestions
+      if (searchType === "all fields") {
+        suggestions.push(`${input} in title`);
+        suggestions.push(`${input} in description`);
+      }
+
+      // If no exact matches, find partial matches for suggestions
+      const titleSuggestions = await Ppulist.find({
+        title: { $regex: `.*${input}.*`, $options: "i" }
+      }).limit(3).select('title');
+
+      const descSuggestions = await Ppulist.find({
+        description: { $regex: `.*${input}.*`, $options: "i" }
+      }).limit(3).select('description');
+
+      // Extract unique suggestions
+      titleSuggestions.forEach(item => {
+        if (!suggestions.includes(item.title)) {
+          suggestions.push(item.title);
+        }
+      });
+
+      descSuggestions.forEach(item => {
+        // Extract a relevant snippet from description
+        const desc = item.description;
+        const index = desc.toLowerCase().indexOf(input.toLowerCase());
+        if (index >= 0) {
+          const start = Math.max(0, index - 15);
+          const end = Math.min(desc.length, index + input.length + 15);
+          const snippet = desc.substring(start, end);
+          if (!suggestions.includes(snippet)) {
+            suggestions.push(snippet);
+          }
+        }
+      });
+
+      suggestions = suggestions.slice(0, 5); // Limit to 5 suggestions
+    }
+
+    // Prepare search message
+    let searchMessage = "";
+    if (allPpulists.length > 0) {
+      searchMessage = `Found ${allPpulists.length} results for "${input}"`;
+      if (searchType !== "all fields") {
+        searchMessage += ` in ${searchType}`;
+      }
+    } else {
+      searchMessage = `No results found for "${input}"`;
+      if (searchType !== "all fields") {
+        searchMessage += ` in ${searchType}`;
+      }
+    }
+
+    // Render the results
     return res.render("ppulists/index.ejs", {
       allPpulists,
-      searchMessage: `Search results for "${input}" by title`,
+      searchMessage,
+      searchQuery: input,
+      suggestions: suggestions
+    });
+
+  } catch (error) {
+    console.error('Search error:', error);
+    return res.render("ppulists/index.ejs", {
+      allPpulists: [],
+      searchMessage: `Error searching for "${input}". Please try again.`,
       searchQuery: input
     });
   }
-
-  // Search by description
-  allPpulists = await Ppulist.find({
-    description: { $regex: formattedInput, $options: "i" }
-  }).sort({ time: -1 });
-
-  if (allPpulists.length > 0) {
-    console.log(`Found ${allPpulists.length} results by description`);
-    return res.render("ppulists/index.ejs", {
-      allPpulists,
-      searchMessage: `Search results for "${input}" by description`,
-      searchQuery: input
-    });
-  }
-
-  // Search by postedBy
-  allPpulists = await Ppulist.find({
-    postedBy: { $regex: formattedInput, $options: "i" }
-  }).sort({ time: -1 });
-
-  if (allPpulists.length > 0) {
-    console.log(`Found ${allPpulists.length} results by posted by`);
-    return res.render("ppulists/index.ejs", {
-      allPpulists,
-      searchMessage: `Search results for "${input}" by posted by`,
-      searchQuery: input
-    });
-  }
-
-  // If no results found
-  console.log('No results found');
-  return res.render("ppulists/index.ejs", {
-    allPpulists: [],
-    searchMessage: `No results found for "${input}"`,
-    searchQuery: input
-  });
 }))
 
 
