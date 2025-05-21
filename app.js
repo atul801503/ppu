@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
-const ExpressError = require("./utils/ExpressError.js");
+const { ExpressError } = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
 const session = require("express-session");
 const ppulistRoutes = require("./routes/ppulistRoutes");
@@ -113,19 +113,6 @@ app.get('/api/search-suggestions', wrapAsync(async (req, res) => {
 // });
 
 
-
-app.all('*', (req, res, next) => {
-    next(new ExpressError(404, "PPU Page Not Found"));
-});
-
-
-
-
-app.use((err, req, res, next) => {
-    let {statusCode= 500, message = "Somethink went wrong"} = err;
-    res.status(statusCode).render("error.ejs", { message});
-//    res.status(statusCode).send(message);
-});
 
 app.get('/search', wrapAsync(async(req, res) => {
   const Ppulist = require('./models/ppulist');
@@ -247,8 +234,16 @@ app.get('/search', wrapAsync(async(req, res) => {
   }
 }))
 
+// Catch-all route for undefined routes - must be after all other routes
+app.all('*', (req, res, next) => {
+    next(new ExpressError(404, "PPU Page Not Found"));
+});
 
-
+// Error handler
+app.use((err, req, res, next) => {
+    let {statusCode= 500, message = "Something went wrong"} = err;
+    res.status(statusCode).render("error.ejs", { message });
+});
 
 app.listen(8081, () => {
     console.log("ppu team is working is project on port 8081");
