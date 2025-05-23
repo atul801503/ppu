@@ -3,55 +3,55 @@
     <div class="col-8 offset-2">
         <br><br/>
     <h3>Create a New Post</h3>
-    <form method="POST" action="/ppulists" novalidate class="needs-validation">
+    <form method="POST" action="/ppulists" enctype="multipart/form-data" novalidate class="needs-validation">
         <div class="mb-3">
             <label for="title" class="form-label">Title</label>
-            <input 
-            name="ppulist[title]" 
-            placeholder="Enter title" 
-            type="text" 
-            class="form-control" 
+            <input
+            name="ppulist[title]"
+            placeholder="Enter title"
+            type="text"
+            class="form-control"
             required >
         </div>
-        
+
         <div class="mb-3">
             <label for="description" class="form-label">Description</label>
-            <textarea 
-            name="ppulist[description]" 
-            placeholder="Enter description" 
-            class="form-control" 
+            <textarea
+            name="ppulist[description]"
+            placeholder="Enter description"
+            class="form-control"
             required></textarea>
         </div>
-        
+
         <div class="mb-3">
-            <label for="photo" class="form-label">Upload Photo</label>
-            <input 
-                name="ppulist[photo]" 
-                id="photo"
-                class="form-control" 
+            <label for="file-upload" class="form-label">Upload Photo</label>
+            <input
+                name="ppulist[file]"
+                id="file-upload"
+                class="form-control"
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.gif">
+                accept=".jpg,.jpeg,.png,.gif,.pdf">
         </div>
 
         <div class="row">
             <div class="mb-3 col-md-5">
                 <label for="postedBy" class="form-label">Posted By</label>
-                <input 
-                name="ppulist[postedBy]" 
-                placeholder="Enter Posted Name" 
-                type="text" 
-                class="form-control" 
+                <input
+                name="ppulist[postedBy]"
+                placeholder="Enter Posted Name"
+                type="text"
+                class="form-control"
                 required>
             </div>
 
             <div class="mb-3 col-md-6">
                 <label for="time" class="form-label">Time & Date</label>
                 <div class="input-group">
-                    <input 
+                    <input
                         id="time"
-                        name="ppulist[time]" 
-                        class="form-control" 
-                        required 
+                        name="ppulist[time]"
+                        class="form-control"
+                        required
                         type="datetime-local"
                         max=""
                     >
@@ -62,7 +62,7 @@
                 <div class="mt-2 text-muted" id="timeDisplay"></div>
             </div>
         </div>
-        
+
         <button class="btn btn-warning">Submit Post.</button>
         <br><br/>
     </form>
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const timeInput = document.getElementById('time');
     const setCurrentBtn = document.getElementById('setCurrentTime');
     const timeDisplay = document.getElementById('timeDisplay');
-    
+
     // Function to get current datetime in correct format
     function getCurrentDateTime() {
         const now = new Date();
@@ -86,11 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to format datetime for display
     function formatDisplayDateTime(isoString) {
-        const options = { 
-            year: 'numeric', 
-            month: 'short', 
+        const options = {
+            year: 'numeric',
+            month: 'short',
             day: 'numeric',
-            hour: '2-digit', 
+            hour: '2-digit',
             minute: '2-digit',
             hour12: true
         };
@@ -120,11 +120,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial setup
     updateDateTime();
     setCurrentTime(); // Set to current time by default
-    
+
     // Event listeners
     timeInput.addEventListener('change', updateDisplay);
     setCurrentBtn.addEventListener('click', setCurrentTime);
-    
+
     // Update every minute to keep current
     setInterval(updateDateTime, 60000);
 });

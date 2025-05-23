@@ -1,17 +1,25 @@
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
-const Ppulist = require("./models/ppulist.js");
 const path = require("path");
 const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
+const { ExpressError } = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
-const ExpressError = require("./utils/ExpressError.js");
 const session = require("express-session");
+const ppulistRoutes = require("./routes/ppulistRoutes");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const User = require("./models/user.js");
 
 
 
-// Mongoose data base connect 
+// Router //
+const userRouter = require("./routes/user.js");
+
+
+
+// Mongoose data base connect
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/ppupatnagroup";
 
@@ -45,113 +53,80 @@ const sessionOptions ={
 };
 app.use(session(sessionOptions));
 
+app.use(passport.initialize());  // <-- Fix here
+app.use(passport.session());  
+passport.use(new LocalStrategy(User.authenticate()));
+
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
 
 // API Working in site
 app.get("/", (req, res) => {
     res.send("Hi i am ppu team");
-})
- // Index Route
-app.get("/ppulists", wrapAsync(async (req, res) => {
-   const  allPpulists = await Ppulist.find({});
-   res.render("ppulists/index.ejs", {allPpulists})
-        
-}));
-
-// New Post Route
-app.get("/ppulists/newpost", (req, res) => {
-    res.render("ppulists/newpost.ejs");
 });
-;
 
 
-// Show Route
-app.get("/ppulists/:id", wrapAsync(async (req, res) => {
-    let {id} = req.params;
-    const ppulist = await Ppulist.findById(id) // any data passing the show.ejs
-    res.render("ppulists/show.ejs",{ppulist});
-}));
+// app.get("/demouser", async (req, res) => {
+//   let fakeUser = new User({
+//     email: "atulkumar234123@gmail.com",
+//     username: "atul123"
+//   });
 
-// Create New Post Route
+// let registerUser = await User.register(fakeUser, "801503");
+// res.send(registerUser);
+// });
 
-app.post("/ppulists", 
-    wrapAsync(async(req, res, next) => {
-        // Check if ppulist data exists
-        if(!req.body.ppulist) {
-            throw new ExpressError(400, "Send valid data for ppu");
-        }
+// Use the ppulist routes
+app.use("/ppulists", ppulistRoutes);
+app.use("/",userRouter);
 
-        // Validate required fields
-        const requiredFields = ['title', 'description', 'postedBy', 'time'];
-        const missingFields = requiredFields.filter(field => !req.body.ppulist[field]);
-        
-        if (missingFields.length > 0) {
-            throw new ExpressError(400, `Missing required fields: ${missingFields.join(', ')}`);
-        }
 
-        // Create and save new post
-        const newPpulist = new Ppulist(req.body.ppulist);
-        await newPpulist.save();
-        
-        res.redirect("/ppulists");
+// API endpoint to get search suggestions
+app.get('/api/search-suggestions', wrapAsync(async (req, res) => {
+  const Ppulist = require('./models/ppulist');
+  const query = req.query.q ? req.query.q.trim() : '';
+
+  if (!query || query.length < 1) {
+    return res.json([]);
+  }
+
+  try {
+    // Find posts with titles that match the query
+    const titleMatches = await Ppulist.find({
+      title: { $regex: query, $options: 'i' }
     })
-);
+    .sort({ time: -1 })
+    .limit(10)
+    .select('title _id');
 
-// Edit Post Route
-app.get("/ppulists/:id/editpost", wrapAsync(async (req, res) => {
-    let { id } = req.params;
-    const ppulist = await Ppulist.findById(id);
-    res.render("ppulists/editpost.ejs", { ppulist });
-}));
+    // Format the results
+    const suggestions = titleMatches.map(post => ({
+      id: post._id.toString(),
+      title: post.title
+    }));
 
-// Update Route
-app.put("/ppulists/:id", 
-    wrapAsync(async (req, res) => {
-        // 1. Validate incoming data structure
-        if (!req.body.ppulist) {
-            throw new ExpressError(400, "Invalid data format - expected { ppulist: {...} }");
-        }
+    // Add search modifiers if we have results
+    if (suggestions.length > 0 && query.length > 2) {
+      suggestions.push({
+        id: 'modifier-title',
+        title: `${query} in title`,
+        isModifier: true
+      });
 
-        // 2. Validate required fields
-        const requiredFields = ['title', 'description', 'postedBy', 'time'];
-        const missingFields = requiredFields.filter(field => !req.body.ppulist[field]);
-        
-        if (missingFields.length > 0) {
-            throw new ExpressError(400, `Missing required fields: ${missingFields.join(', ')}`);
-        }
-
-        // 3. Process the update
-        const { id } = req.params;
-        const updatedPpulist = await Ppulist.findByIdAndUpdate(
-            id,
-            { ...req.body.ppulist },
-            { new: true, runValidators: true } // Return updated doc and run schema validators
-        );
-
-        if (!updatedPpulist) {
-            throw new ExpressError(404, "Post not found");
-        }
-
-        // 4. Successful response
-        res.redirect(`/ppulists/${id}`);
-    })
-);
-
-// Delete Post Route
-app.delete("/ppulists/:id", wrapAsync(async (req, res) => {
-    try {
-        let { id } = req.params;
-        let deletePpulist = await Ppulist.findByIdAndDelete(id); // ✅ Corrected variable name
-
-        if (!deletePpulist) {
-            return res.status(404).send("Ppulist not found");
-        }
-
-        console.log("Deleted:", deletePpulist); // ✅ Correctly logging the deleted document
-        res.redirect("/ppulists");
-    } catch (error) {
-        console.error("Error deleting Ppulist:", error);
-        res.status(500).send("Server error");
+      suggestions.push({
+        id: 'modifier-description',
+        title: `${query} in description`,
+        isModifier: true
+      });
     }
+
+    res.json(suggestions);
+  } catch (error) {
+    console.error('Error fetching search suggestions:', error);
+    res.status(500).json({ error: 'Failed to fetch suggestions' });
+  }
 }));
 
 
@@ -169,102 +144,137 @@ app.delete("/ppulists/:id", wrapAsync(async (req, res) => {
 
 
 
+app.get('/search', wrapAsync(async(req, res) => {
+  const Ppulist = require('./models/ppulist');
+
+  // Get the search query and clean it
+  let input = req.query.q ? req.query.q.trim().replace(/\s+/g, " ") : "";
+
+  if (input === "" || input === " ") {
+    // If no flash middleware is set up, just redirect
+    return res.redirect("/ppulists");
+  }
+
+  console.log('Searching for:', input);
+
+  try {
+    let searchQuery = {};
+    let searchType = "all fields";
+
+    // Check for "in title" or "in description" modifiers
+    if (input.toLowerCase().endsWith(" in title")) {
+      // Search only in title
+      const actualQuery = input.slice(0, -9).trim(); // Remove " in title"
+      searchQuery = { title: { $regex: actualQuery, $options: "i" } };
+      searchType = "title";
+      input = actualQuery; // Update input for display purposes
+    } else if (input.toLowerCase().endsWith(" in description")) {
+      // Search only in description
+      const actualQuery = input.slice(0, -15).trim(); // Remove " in description"
+      searchQuery = { description: { $regex: actualQuery, $options: "i" } };
+      searchType = "description";
+      input = actualQuery; // Update input for display purposes
+    } else {
+      // Search across all fields
+      searchQuery = {
+        $or: [
+          { title: { $regex: input, $options: "i" } },
+          { description: { $regex: input, $options: "i" } },
+          { postedBy: { $regex: input, $options: "i" } }
+        ]
+      };
+    }
+
+    // Execute the search
+    let allPpulists = await Ppulist.find(searchQuery).sort({ time: -1 });
+
+    console.log(`Found ${allPpulists.length} results for "${input}" in ${searchType}`);
+
+    // Get some search suggestions based on existing data
+    let suggestions = [];
+    if (allPpulists.length === 0) {
+      // Add search modifiers as suggestions
+      if (searchType === "all fields") {
+        suggestions.push(`${input} in title`);
+        suggestions.push(`${input} in description`);
+      }
+
+      // If no exact matches, find partial matches for suggestions
+      const titleSuggestions = await Ppulist.find({
+        title: { $regex: `.*${input}.*`, $options: "i" }
+      }).limit(3).select('title');
+
+      const descSuggestions = await Ppulist.find({
+        description: { $regex: `.*${input}.*`, $options: "i" }
+      }).limit(3).select('description');
+
+      // Extract unique suggestions
+      titleSuggestions.forEach(item => {
+        if (!suggestions.includes(item.title)) {
+          suggestions.push(item.title);
+        }
+      });
+
+      descSuggestions.forEach(item => {
+        // Extract a relevant snippet from description
+        const desc = item.description;
+        const index = desc.toLowerCase().indexOf(input.toLowerCase());
+        if (index >= 0) {
+          const start = Math.max(0, index - 15);
+          const end = Math.min(desc.length, index + input.length + 15);
+          const snippet = desc.substring(start, end);
+          if (!suggestions.includes(snippet)) {
+            suggestions.push(snippet);
+          }
+        }
+      });
+
+      suggestions = suggestions.slice(0, 5); // Limit to 5 suggestions
+    }
+
+    // Prepare search message
+    let searchMessage = "";
+    if (allPpulists.length > 0) {
+      searchMessage = `Found ${allPpulists.length} results for "${input}"`;
+      if (searchType !== "all fields") {
+        searchMessage += ` in ${searchType}`;
+      }
+    } else {
+      searchMessage = `No results found for "${input}"`;
+      if (searchType !== "all fields") {
+        searchMessage += ` in ${searchType}`;
+      }
+    }
+
+    // Render the results
+    return res.render("ppulists/index.ejs", {
+      allPpulists,
+      searchMessage,
+      searchQuery: input,
+      suggestions: suggestions
+    });
+
+  } catch (error) {
+    console.error('Search error:', error);
+    return res.render("ppulists/index.ejs", {
+      allPpulists: [],
+      searchMessage: `Error searching for "${input}". Please try again.`,
+      searchQuery: input
+    });
+  }
+}))
+
+// Catch-all route for undefined routes - must be after all other routes
 app.all('*', (req, res, next) => {
     next(new ExpressError(404, "PPU Page Not Found"));
 });
 
-
-
-
+// Error handler
 app.use((err, req, res, next) => {
-    let {statusCode= 500, message = "Somethink went wrong"} = err;
-    res.status(statusCode).render("error.ejs", { message});
-//    res.status(statusCode).send(message);
+    let {statusCode= 500, message = "Something went wrong"} = err;
+    res.status(statusCode).render("error.ejs", { message });
 });
 
-app.get('/search', async(req, res)=>{
-  let input = req.query.q.trim().replace(/\s+/g, " ");
-  if (input == "" || input == " ") {
-    req.flash("error", "Please enter search query!");
-    res.redirect("/listings");
-  }
-  
-
-  let data = input.split("");
-  let element = "";
-  let flag = false;
-  for (let index = 0; index < data.length; index++) {
-    if (index == 0 || flag) {
-      element = element + data[index].toUpperCase();
-    } else {
-      element = element + data[index].toLowerCase();
-    }
-    flag = data[index] == " ";
-  }
-
-  let allListings = await Listing.find({
-    title: { $regex: element, $options: "i" },
-  });
-  if (allListings.length != 0) {
-    res.locals.success = "Listings searched by Title!";
-    res.render("listings/index.ejs", { allListings });
-    return;
-  }
-
-  if (allListings.length == 0) {
-    allListings = await Listing.find({
-      category: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
-    if (allListings.length != 0) {
-      res.locals.success = "Listings searched by Category!";
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
-  }
-  if (allListings.length == 0) {
-    allListings = await Listing.find({
-      country: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
-    if (allListings.length != 0) {
-      res.locals.success = "Listings searched by Country!";
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
-  }
-
-  if (allListings.length == 0) {
-    allListings = await Listing.find({
-      location: { $regex: element, $options: "i" },
-    }).sort({ _id: -1 });
-    if (allListings.length != 0) {
-      res.locals.success = "Listings searched by Location!";
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
-  }
-
-  const intValue = parseInt(element, 10);
-  const intDec = Number.isInteger(intValue);
-
-  if (allListings.length == 0 && intDec) {
-    allListings = await Listing.find({ price: { $lte: element } }).sort({
-      price: 1,
-    });
-    if (allListings.length != 0) {
-      res.locals.success = `Listings searched by price less than Rs ${element}!`;
-      res.render("listings/index.ejs", { allListings });
-      return;
-    }
-  }
-  if (allListings.length == 0) {
-    req.flash("error", "No listings found based on your search!");
-    res.redirect("/listings");
-  }
-})
-  
-
-
-
-app.listen(8080, () => {
-    console.log("ppu team is working is project");
+app.listen(8081, () => {
+    console.log("ppu team is working is project on port 8081");
 });
