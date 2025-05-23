@@ -15,7 +15,11 @@
     "ejs-mate": "^4.0.0",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+<<<<<<< HEAD
     "instal": "^0.0.1-security",
+=======
+    "jsonwebtoken": "^9.0.2",
+>>>>>>> 27c6495275a2fed8f0bceb4354b7d87bf74d43f3
     "method-override": "^3.0.0",
     "mongoose": "^8.15.0",
     "multer": "^1.4.5-lts.1",

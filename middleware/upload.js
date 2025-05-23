@@ -61,4 +61,8 @@ const upload = multer({
 // Export both the upload middleware and the parseNestedFields middleware
 module.exports = {
     single: (fieldName) => [upload.single(fieldName), parseNestedFields]
+<<<<<<< HE
 };
+=======
+};
+>>>>>>> 27c6495275a2fed8f0bceb4354b7d87bf74d43f3
