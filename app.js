@@ -41,6 +41,7 @@ app.use(methodOverride("_method"));
 app.engine('ejs', ejsMate);
 app.use(express.static(path.join(__dirname,"/public")))
 
+
 const sessionOptions ={
     secret: "mysupersecretcode",
     resave: false,
@@ -51,6 +52,8 @@ const sessionOptions ={
         httpOnly: true,
     },
 };
+
+app.use(express.json());
 app.use(session(sessionOptions));
 
 app.use(passport.initialize());  // <-- Fix here
