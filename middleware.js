@@ -1,8 +1,7 @@
 module.exports.isLoggedIn = (req, res, next) => {
-    // console.log("req.path",req.path,"req.original url",req.originalUrl);
     if (!req.isAuthenticated()) {
         req.session.redirectUrl = req.originalUrl;
-        req.flash("error", "you must be logged in on wonderlust");
+        req.flash("error", "You must be logged in to access this page.");
         return res.redirect("/login");
     }
     next();

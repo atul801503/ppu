@@ -12,13 +12,12 @@ const userSchema = new Schema({
     type: String,
     required: true,
     unique: true,
-    match: [/.+\@.+\..+/, 'Please enter a valid email address']
-  },
-  
+    match: [/.+@.+..+/, 'Please enter a valid email address']
+  }
 });
 
 // Apply passport-local-mongoose plugin to the schema
 userSchema.plugin(passportLocalMongoose);
 
-// Create and export the User model
-module.exports = mongoose.model('User', userSchema);
+// Export the model safely without redeclaring
+module.exports = mongoose.models.User || mongoose.model('User', userSchema);

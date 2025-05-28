@@ -1,5 +1,5 @@
 const Ppulist = require('../models/ppulist');
-const { ExpressError } = require('../utils/ExpressError');
+const ExpressError = require('../utils/ExpressError');
 const fs = require('fs');
 const path = require('path');
 

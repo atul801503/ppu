@@ -8,19 +8,36 @@ router.get("/signup", (req, res) => {
     res.render("users/signup.ejs");
 });
 
-router.post('/signup', 
-    wrapAsync(async(req, res) => {
-        try {
-            let {username, email, password, confirmPassword} = req.body;
-            const newUser = new User({email, username});
-            const registerUser = await User.register(newUser, password);
-            console.log(registerUser);
-            req.flash("success", "New Admin Added Successfully");
-            res.redirect("/ppulistings");
-        } catch (e) {
-            req.flash("error", e.message);
-            res.redirect("/signup");
-        }
+router.post('/signup', async (req, res, next) => {
+  try {
+    const { username, email, password } = req.body;
+
+    // Create a user instance with username, email, accountType defaults to 'user'
+    const user = new User({ username, email });
+
+    // passport-local-mongoose register method handles hashing & saving user
+    const registeredUser = await User.register(user, password);
+
+    // Automatically log the user in after signup (optional)
+    req.login(registeredUser, err => {
+      if (err) return next(err);
+      res.status(201).json({ message: 'User registered successfully', user: { username: registeredUser.username, email: registeredUser.email } });
+    });
+
+  } catch (e) {
+    // Handle errors (like duplicate username/email)
+    res.status(400).json({ error: e.message });
+  }
+});
+
+// Fixed this line - changed 'route' to 'router'
+router.post(
+    "/login",
+    passport.authenticate("local", {
+        failureRedirect: "/login",
+        failureFlash: true,
+        successRedirect: "/ppulistings", // No need for custom function
+        successFlash: "Admin login successfully", // <-- You can set this if using connect-flash-middleware
     })
 );
 
@@ -28,18 +45,9 @@ router.get("/login", (req, res) => {
     res.render("users/login.ejs");
 });
 
-// Fixed this line - changed 'route' to 'router'
-router.post(
-    "/login", 
-    passport.authenticate("local", {
-        failureRedirect: "/login",
-        failureFlash: true,
-    }),
-    async(req, res) => {
-        req.flash("success", "Admin login Successfully");
-        res.redirect("/ppulistings");
-    }
-);
+router.get("/login", (req, res) => {
+    res.render("users/signup.ejs");
+});
 
 router.get("/logout", (req, res, next) => {
     req.logout((err) => {
