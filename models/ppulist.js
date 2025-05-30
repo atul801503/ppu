@@ -1,5 +1,12 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
+const ppuListSchema = new mongoose.Schema({
+    // ... other fields ...
+    author: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
+});
 
 const ppulistSchema = new Schema({
     title: {

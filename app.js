@@ -11,7 +11,7 @@ const LocalStrategy = require("passport-local");
 
 
 
-const { ExpressError } = require("./utils/ExpressError.js");
+const ExpressError = require("./utils/ExpressError.js");
 const wrapAsync = require("./utils/wrapAsync.js");
 
 const User = require("./models/user.js");
@@ -60,6 +60,7 @@ passport.deserializeUser(User.deserializeUser());
 // Middleware to pass flash messages and user info to templates
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
+  // console.log(success);
   res.locals.error = req.flash("error");
   res.locals.currUser = req.user;
   next();
@@ -72,6 +73,38 @@ app.use("/ppulists", ppulistRoutes);
 // Root route
 app.get("/", (req, res) => {
   res.send("Hi I am PPU team");
+});
+
+// Mock database (in a real app, use a database like MongoDB/PostgreSQL)
+const users = [
+    {
+        id: 1,
+        username: 'user1',
+        password: '$2a$10$N9qo8uLOickgx2ZMRZoMy.MrU2OFNHY6xX7eQ7aJ0q7T3QbQ1JQeW' // Hashed "old_password"
+    }
+];
+
+// pp.use(bodyParser.json());
+app.use(express.static('public')); // Serve HTML file
+
+// Password change endpoint
+app.post('/change-password', async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const user = users[0]; // For demo, assume user is logged in
+
+    // 1. Check if current password is correct
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+        return res.status(401).json({ error: "Current password is incorrect." });
+    }
+
+    // 2. Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // 3. Update password (in a real app, save to database)
+    user.password = hashedPassword;
+
+    res.json({ message: "Password updated successfully!" });
 });
 
 // Search Suggestions API

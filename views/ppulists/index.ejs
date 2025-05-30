@@ -1,5 +1,108 @@
 <% layout("ppulayouts/ppuboilerplate") %>
 
+<style>
+    .object-fit-cover {
+        object-fit: cover;
+    }
+    
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 0.5rem;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-img-top {
+        width: 100%;
+        height: 15rem;
+        background-color: #f8f9fa;
+    }
+    
+    .card-body {
+        padding: 1.25rem;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #212529;
+    }
+    
+    .card-text {
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .text-truncate {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    /* Pagination styles */
+    .pagination {
+        justify-content: center;
+        margin-top: 2rem;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .page-link {
+        color: #0d6efd;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 1399.98px) {
+        .card-img-top {
+            height: 13rem;
+        }
+    }
+    
+    @media (max-width: 1199.98px) {
+        .card-img-top {
+            height: 11rem;
+        }
+    }
+    
+    @media (max-width: 991.98px) {
+        .row-cols-lg-4 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .card-img-top {
+            height: 13rem;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .row-cols-lg-4 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .card-img-top {
+            height: 15rem;
+        }
+    }
+    
+    @media (max-width: 575.98px) {
+        .row-cols-lg-4 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    
+</style>
+
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-md-6">
@@ -25,17 +128,10 @@
                 </div>
             <% } %>
         </div>
-        <!-- <div class="col-md-6">
-            <div class="text-end">
-                <a href="/ppulists/newpost" class="btn btn-success">
-                    <i class="bi bi-plus-circle me-1"></i> Create New Post
-                </a>
-            </div>
-        </div> -->
     </div>
 </div>
 
-<div class="row row-cols-lg-3 row-cols-md-2 row-cols-sm-1 g-4">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     <% for (let ppulist of allPpulists) { %>
         <div class="col">
             <a href="/ppulists/<%= ppulist._id %>" class="text-decoration-none">
@@ -45,11 +141,10 @@
                             src="<%= typeof ppulist.image === 'string' ? ppulist.image : ppulist.image.url %>"
                             class="card-img-top object-fit-cover"
                             alt="<%= ppulist.title %>"
-                            style="height: 20rem; object-fit: cover;"
                             onerror="this.onerror=null; this.src='/images/default-thumbnail.jpg'; this.alt='Default image'"
                         />
                     <% } else { %>
-                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 20rem;">
+                        <div class="card-img-top d-flex align-items-center justify-content-center bg-light">
                             <i class="bi bi-image fs-1 text-muted"></i>
                         </div>
                     <% } %>
@@ -68,4 +163,83 @@
             </a>
         </div>
     <% } %>
+    
 </div>
+
+<% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <% /* Previous Page Button */ %>
+            <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
+                <a class="page-link" 
+                   href="<%= currentPage > 1 ? '?page=' + (currentPage - 1) + (locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '') : '#' %>">
+                    &laquo; Previous
+                </a>
+            </li>
+
+            <% /* Show page numbers if not too many */ %>
+            <% if (totalPages <= 10) { %>
+                <% for (let i = 1; i <= totalPages; i++) { %>
+                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                        <a class="page-link" 
+                           href="?page=<%= i %><%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">
+                            <%= i %>
+                        </a>
+                    </li>
+                <% } %>
+            <% } else { %>
+                <% /* Show limited page numbers with ellipsis */ %>
+                <% const startPage = Math.max(1, currentPage - 2);
+                   const endPage = Math.min(totalPages, currentPage + 2); %>
+                
+                <% if (startPage > 1) { %>
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1<%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">1</a>
+                    </li>
+                    <% if (startPage > 2) { %>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <% } %>
+                <% } %>
+                
+                <% for (let i = startPage; i <= endPage; i++) { %>
+                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                        <a class="page-link" 
+                           href="?page=<%= i %><%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">
+                            <%= i %>
+                        </a>
+                    </li>
+                <% } %>
+                
+                <% if (endPage < totalPages) { %>
+                    <% if (endPage < totalPages - 1) { %>
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    <% } %>
+                    <li class="page-item">
+                        <a class="page-link" 
+                           href="?page=<%= totalPages %><%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">
+                            <%= totalPages %>
+                        </a>
+                    </li>
+                <% } %>
+            <% } %>
+
+            <% /* Next Page Button */ %>
+            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
+                <a class="page-link" 
+                   href="<%= currentPage < totalPages ? '?page=' + (currentPage + 1) + (locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '') : '#' %>">
+                    Next &raquo;
+                </a>
+            </li>
+        </ul>
+    </nav>
+<% } %>
+
+<a href="#" class="previous">&laquo; Previous</a>
+<a href="#" class="next">Next &raquo;</a>
+
+<a href="#" class="previous round">&#8249;</a>
+<a href="#" class="next round">&#8250;</a>

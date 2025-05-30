@@ -1,3 +1,5 @@
+const ExpressError = require("../utils/ExpressError");
+
 // Simplified auth middleware for testing
 module.exports.authenticate = (req, res, next) => {
   // For testing purposes, we'll just pass through without authentication
@@ -8,5 +10,8 @@ module.exports.authenticate = (req, res, next) => {
 
 module.exports.isAdmin = (req, res, next) => {
   // For testing purposes, we'll just pass through
+  if (!req.user || req.user.role !== 'admin') {
+    throw new ExpressError(403, "You do not have permission to perform this action.");
+  }
   next();
 };

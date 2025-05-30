@@ -13,6 +13,11 @@ const userSchema = new Schema({
     required: true,
     unique: true,
     match: [/.+@.+..+/, 'Please enter a valid email address']
+  },
+  role : {
+    type: String,
+    enum: ['user', 'admin'],
+    default: 'user'
   }
 });
 
