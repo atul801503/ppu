@@ -1,0 +1,220 @@
+<% layout("ppulayouts/ppuboilerplate") %>
+
+<style>
+    #filters {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        margin-right: 2rem;
+        gap: 1rem;
+    }
+
+    .filter {
+        text-align: center;
+        padding: 0.5rem 1rem;
+        opacity: 0.6;
+        transition: all 0.3s ease;
+        border-radius: 0.5rem;
+        border: 1px solid #e0e0e0;
+    }
+
+    .filter:hover {
+        opacity: 1;
+        cursor: pointer;
+        background-color: #f0f0f0;
+    }
+
+    .filter.active {
+        opacity: 1;
+        background-color: #0d6efd;
+        color: white;
+        border-color: #0d6efd;
+    }
+
+    .filter p {
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+
+    .tax-info {
+        display: none;
+    }
+
+    .show-tax .tax-info {
+        display: inline;
+    }
+
+    .tax-toggle {
+        border: 1px solid #dee2e6;
+        border-radius: 1rem;
+        height: 3.5rem;
+        padding: 1rem;
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        background-color: white;
+    }
+
+    .listing-card {
+        transition: transform 0.2s ease;
+        margin-bottom: 1.5rem;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .listing-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card-img-top {
+        height: 20rem;
+        object-fit: cover;
+        border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .card-body {
+        padding: 1.25rem;
+    }
+
+    .card-text {
+        color: #333;
+    }
+
+    .listing-link {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    @media (max-width: 768px) {
+        #filters {
+            gap: 0.5rem;
+        }
+        
+        .filter {
+            padding: 0.5rem;
+            margin-right: 0;
+        }
+        
+        .tax-toggle {
+            margin-left: 0;
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+
+<body>
+    <div id="filters">
+        <div class="filter <%= category === 'Trending' ? 'active' : '' %>" data-category="Trending">
+            <div><i class="fa-solid fa-fire"></i></div>
+            <p>Trending</p>
+        </div>
+        <div class="filter <%= category === 'Rooms' ? 'active' : '' %>" data-category="Rooms">
+            <div><i class="fa-solid fa-bed"></i></div>
+            <p>Rooms</p>
+        </div>
+        <div class="filter <%= category === 'Iconic cities' ? 'active' : '' %>" data-category="Iconic cities">
+            <div><i class="fa-solid fa-mountain-city"></i></div>
+            <p>Iconic cities</p>
+        </div>
+        <div class="filter <%= category === 'Mountains' ? 'active' : '' %>" data-category="Mountains">
+            <div><i class="fa-solid fa-mountain"></i></div>
+            <p>Mountains</p>
+        </div>
+        <div class="filter <%= category === 'Castles' ? 'active' : '' %>" data-category="Castles">
+            <div><i class="fa-brands fa-fort-awesome"></i></div>
+            <p>Castles</p>
+        </div>
+        <div class="filter <%= category === 'Amazing pools' ? 'active' : '' %>" data-category="Amazing pools">
+            <div><i class="fa-solid fa-person-swimming"></i></div>
+            <p>Amazing pools</p>
+        </div>
+        <div class="filter <%= category === 'Camping' ? 'active' : '' %>" data-category="Camping">
+            <div><i class="fa-solid fa-campground"></i></div>
+            <p>Camping</p>
+        </div>
+        <div class="filter <%= category === 'Farms' ? 'active' : '' %>" data-category="Farms">
+            <div><i class="fa-solid fa-cow"></i></div>
+            <p>Farms</p>
+        </div>
+        <div class="filter <%= category === 'Arctic' ? 'active' : '' %>" data-category="Arctic">
+            <div><i class="fa-solid fa-snowflake"></i></div>
+            <p>Arctic</p>
+        </div>
+        <div class="filter <%= category === 'Domes' ? 'active' : '' %>" data-category="Domes">
+            <div><i class="fa-solid fa-igloo"></i></div>
+            <p>Domes</p>
+        </div>
+        <div class="filter <%= category === 'Boats' ? 'active' : '' %>" data-category="Boats">
+            <div><i class="fa-solid fa-ship"></i></div>
+            <p>Boats</p>
+        </div>
+
+        <div class="tax-toggle">
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="taxToggle">
+                <label class="form-check-label" for="taxToggle">Display total after taxes</label>
+            </div>
+        </div>
+    </div>
+
+    <% if (currRoute.indexOf("search")>=0) { %>
+        <h3 class="mb-4">Search results for: <%= category %> (<%= allListings.length %> results)</h3>
+    <% } else { %>
+        <h3 class="mb-4">Listing category: <%= category %></h3>
+    <% } %>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+        <% for(listing of allListings){ %>
+            <div class="col">
+                <a class="listing-link" href="/listings/<%= listing._id %>">
+                    <div class="card listing-card h-100">
+                        <img src="<%= listing.image.url %>" class="card-img-top" alt="<%= listing.title %>">
+                        <div class="card-body">
+                            <h5 class="card-title"><%= listing.title %></h5>
+                            <p class="card-text">
+                                <span class="price">₹<%= listing.price.toLocaleString("en-IN") %></span>/night
+                                <span class="tax-info">+ ₹<%= Math.round(listing.price * 0.18).toLocaleString("en-IN") %> GST</span>
+                            </p>
+                            <% if (listing.category) { %>
+                                <span class="badge bg-primary"><%= listing.category %></span>
+                            <% } %>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Category filtering
+        document.querySelectorAll('.filter').forEach(filter => {
+            filter.addEventListener('click', function() {
+                const category = this.getAttribute('data-category');
+                if (window.location.pathname.includes('search')) {
+                    window.location.href = `/search?q=${encodeURIComponent(category)}`;
+                } else {
+                    window.location.href = `/listings/category/${encodeURIComponent(category)}`;
+                }
+            });
+        });
+
+        // Tax toggle functionality
+        const taxToggle = document.getElementById('taxToggle');
+        taxToggle.addEventListener('change', function() {
+            document.body.classList.toggle('show-tax', this.checked);
+            
+            // Save preference to localStorage
+            localStorage.setItem('showTax', this.checked);
+        });
+
+        // Initialize tax toggle state
+        document.addEventListener('DOMContentLoaded', function() {
+            const showTax = localStorage.getItem('showTax') === 'true';
+            if (showTax) {
+                taxToggle.checked = true;
+                document.body.classList.add('show-tax');
+            }
+        });
+    </script>
+</body>

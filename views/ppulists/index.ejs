@@ -1,137 +1,420 @@
 <% layout("ppulayouts/ppuboilerplate") %>
 
 <style>
-    .object-fit-cover {
-        object-fit: cover;
-    }
-    
-    .card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        border-radius: 0.5rem;
-        overflow: hidden;
-        border: none;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .card-img-top {
-        width: 100%;
-        height: 15rem;
-        background-color: #f8f9fa;
-    }
-    
-    .card-body {
-        padding: 1.25rem;
-    }
-    
-    .card-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-        color: #212529;
-    }
-    
-    .card-text {
-        color: #6c757d;
-        margin-bottom: 0.75rem;
-        font-size: 0.9rem;
-    }
-    
-    .text-truncate {
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-    
-    /* Pagination styles */
-    .pagination {
-        justify-content: center;
-        margin-top: 2rem;
-    }
-    
-    .page-item.active .page-link {
-        background-color: #0d6efd;
-        border-color: #0d6efd;
-    }
-    
-    .page-link {
-        color: #0d6efd;
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 1399.98px) {
-        .card-img-top {
-            height: 13rem;
-        }
-    }
-    
-    @media (max-width: 1199.98px) {
-        .card-img-top {
-            height: 11rem;
-        }
-    }
-    
-    @media (max-width: 991.98px) {
-        .row-cols-lg-4 {
-            grid-template-columns: repeat(3, 1fr);
-        }
-        .card-img-top {
-            height: 13rem;
-        }
-    }
-    
-    @media (max-width: 767.98px) {
-        .row-cols-lg-4 {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .card-img-top {
-            height: 15rem;
-        }
-    }
-    
-    @media (max-width: 575.98px) {
-        .row-cols-lg-4 {
-            grid-template-columns: 1fr;
-        }
-    }
+    /* Base Styles */
+.container {
+  padding: 0 15px;
+  max-width: 1400px;
+}
 
-    
+/* Filter Section Styles */
+#filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+  padding: 0 10px;
+}
+
+#filter a {
+  text-decoration: none;
+  color: #333;
+  text-align: center;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.8rem;
+  transition: all 0.3s ease;
+  background-color: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  flex: 1 0 auto;
+  min-width: 120px;
+}
+
+#filter a:hover {
+  background-color: #e9ecef;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#filter a div {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: #0d6efd;
+}
+
+#filter a p {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Card Grid Layout */
+.row-cols-1 > * {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+.row-cols-sm-2 > * {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.row-cols-md-3 > * {
+  flex: 0 0 33.333%;
+  max-width: 33.333%;
+}
+
+.row-cols-lg-4 > * {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+
+.g-4 {
+  margin-right: -12px;
+  margin-left: -12px;
+}
+
+.g-4 > * {
+  padding-right: 12px;
+  padding-left: 12px;
+  margin-bottom: 24px;
+}
+
+/* Card Styles */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  height: 100%;
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+}
+
+.card-img-top {
+  width: 100%;
+  height: 15rem;
+  background-color: #f8f9fa;
+  object-position: center;
+}
+
+.card-body {
+  padding: 10rem;
+}
+
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #212529;
+  line-height: 1.4;
+}
+
+.card-text {
+  color: #6c757d;
+  margin-bottom: 1rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.text-truncate {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 4.5em;
+}
+
+.card-footer {
+  background-color: transparent;
+  border-top: 1px solid rgba(0,0,0,0.05);
+  padding: 0.75rem 1.5rem 1.5rem;
+  margin-top: auto;
+}
+
+.card-footer small {
+  font-size: 0.8rem;
+  color: #868e96;
+}
+
+/* Slider Styles */
+.cards-slider-container {
+  position: relative;
+  margin: 2rem -15px;
+  padding: 1.5rem 0;
+}
+
+.cards-slider {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 15px;
+  gap: 20px;
+  scrollbar-width: none;
+}
+
+.cards-slider::-webkit-scrollbar {
+  display: none;
+}
+
+.card-slide {
+  flex: 0 0 calc(90% - 10px);
+  scroll-snap-align: start;
+  transition: transform 0.3s ease;
+}
+
+.slider-img {
+  height: 200px;
+  width: 100%;
+  object-fit: cover;
+}
+
+.slider-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.9;
+  transition: all 0.3s;
+  color: #0d6efd;
+  font-size: 1.2rem;
+}
+
+.slider-nav:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.slider-prev {
+  left: 15px;
+}
+
+.slider-next {
+  right: 15px;
+}
+
+/* Scroll to Top Button */
+.scroll-to-top {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #0d6efd;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+  transition: all 0.3s;
+  opacity: 0.8;
+}
+
+.scroll-to-top:hover {
+  opacity: 1;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(13, 110, 253, 0.4);
+}
+
+.scroll-to-top i {
+  font-size: 1.2rem;
+}
+
+/* Pagination Styles */
+.pagination {
+  justify-content: center;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
+}
+
+.page-item.active .page-link {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.page-link {
+  color: #0d6efd;
+  padding: 0.5rem 0.9rem;
+  margin: 0 3px;
+  border-radius: 0.5rem;
+  border: 1px solid #dee2e6;
+  transition: all 0.2s;
+}
+
+.page-link:hover {
+  background-color: #e9ecef;
+}
+
+/* Responsive Adjustments */
+@media (min-width: 576px) {
+  .card-slide {
+    flex: 0 0 calc(50% - 10px);
+  }
+  
+  #filter a {
+    min-width: 140px;
+  }
+}
+
+@media (min-width: 768px) {
+  .card-slide {
+    flex: 0 0 calc(33.333% - 15px);
+  }
+  
+  .card-img-top {
+    height: 13rem;
+  }
+  
+  #filter {
+    justify-content: space-around;
+  }
+}
+
+@media (min-width: 992px) {
+  .card-slide {
+    flex: 0 0 calc(25% - 15px);
+  }
+  
+  .card-img-top {
+    height: 15rem;
+  }
+  
+  #filter {
+    justify-content: space-between;
+  }
+  
+  #filter a {
+    flex: 1;
+    max-width: calc(16.666% - 20px);
+  }
+}
+
+@media (min-width: 1200px) {
+  .card-img-top {
+    height: 16rem;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .card-img-top {
+    height: 14rem;
+  }
+  
+  #filter a div {
+    font-size: 1.3rem;
+  }
+  
+  #filter a p {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .card-img-top {
+    height: 12rem;
+  }
+  
+  #filter {
+    gap: 0.5rem;
+  }
+  
+  #filter a {
+    padding: 0.6rem 0.5rem;
+    min-width: calc(33% - 10px);
+  }
+  
+  #filter a div {
+    font-size: 1.2rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  #filter a p {
+    font-size: 0.75rem;
+  }
+  
+  .card-body {
+    padding: 1.2rem;
+  }
+  
+  .card-title {
+    font-size: 1.05rem;
+  }
+  
+  .card-text {
+    font-size: 0.85rem;
+  }
+}
+
+/* Animation Enhancements */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.col {
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+.col:nth-child(1) { animation-delay: 0.1s; }
+.col:nth-child(2) { animation-delay: 0.2s; }
+.col:nth-child(3) { animation-delay: 0.3s; }
+.col:nth-child(4) { animation-delay: 0.4s; }
+.col:nth-child(5) { animation-delay: 0.5s; }
+/* Continue as needed for more items */
 </style>
 
+
 <div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1>PPU Team Work</h1>
-            <% if (locals.searchMessage) { %>
-                <div class="alert alert-info">
-                    <%= searchMessage %>
-
-                    <% if (locals.suggestions && suggestions.length > 0) { %>
-                        <div class="mt-2">
-                            <p><strong>Did you mean:</strong></p>
-                            <ul class="list-unstyled">
-                                <% suggestions.forEach(suggestion => { %>
-                                    <li>
-                                        <a href="/search?q=<%= encodeURIComponent(suggestion) %>" class="text-primary">
-                                            <%= suggestion %>
-                                        </a>
-                                    </li>
-                                <% }) %>
-                            </ul>
-                        </div>
-                    <% } %>
-                </div>
-            <% } %>
-        </div>
+    <div id="filter">
+        <a href="/ppulists/category/PPU Hubs" class="filter">
+            <div><i class="fa-solid fa-people-group"></i></div>
+            <p>PPU Hubs</p>
+        </a>
+        <a href="/ppulists/category/PPU Syllabus" class="filter">
+            <div><i class="fa-solid fa-book-open"></i></div>
+            <p>PPU Syllabus</p>
+        </a>
+        <a href="/ppulists/category/PPU NewsPaper Cutting" class="filter">
+            <div><i class="fa-regular fa-newspaper"></i></div>
+            <p>PPU NewsPaper Cutting</p>
+        </a>
+        <a href="/ppulists/category/PPU Study Centre" class="filter">
+            <div><i class="fa-solid fa-building-circle-arrow-right"></i></div>
+            <p>PPU Study Centre</p>
+        </a>
+        <a href="/ppulists/category/PPU Notice" class="filter">
+            <div><i class="fa-regular fa-note-sticky"></i></div>
+            <p>PPU Notice</p>
+        </a>
+        <a href="/ppulists/category/PPU College List" class="filter">
+            <div><i class="fa-solid fa-rectangle-list"></i></div>
+            <p>PPU College List</p>
+        </a>
     </div>
-</div>
 
-<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
     <% for (let ppulist of allPpulists) { %>
         <div class="col">
             <a href="/ppulists/<%= ppulist._id %>" class="text-decoration-none">
@@ -166,80 +449,205 @@
     
 </div>
 
-<% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
-    <nav aria-label="Page navigation" class="mt-4">
-        <ul class="pagination justify-content-center">
-            <% /* Previous Page Button */ %>
-            <li class="page-item <%= currentPage === 1 ? 'disabled' : '' %>">
-                <a class="page-link" 
-                   href="<%= currentPage > 1 ? '?page=' + (currentPage - 1) + (locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '') : '#' %>">
-                    &laquo; Previous
-                </a>
-            </li>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <% if (locals.searchMessage) { %>
+                <div class="alert alert-info">
+                    <%= searchMessage %>
 
-            <% /* Show page numbers if not too many */ %>
-            <% if (totalPages <= 10) { %>
-                <% for (let i = 1; i <= totalPages; i++) { %>
-                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                        <a class="page-link" 
-                           href="?page=<%= i %><%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">
-                            <%= i %>
-                        </a>
-                    </li>
-                <% } %>
-            <% } else { %>
-                <% /* Show limited page numbers with ellipsis */ %>
-                <% const startPage = Math.max(1, currentPage - 2);
-                   const endPage = Math.min(totalPages, currentPage + 2); %>
-                
-                <% if (startPage > 1) { %>
-                    <li class="page-item">
-                        <a class="page-link" href="?page=1<%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">1</a>
-                    </li>
-                    <% if (startPage > 2) { %>
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
+                    <% if (locals.suggestions && suggestions.length > 0) { %>
+                        <div class="mt-2">
+                            <p><strong>Did you mean:</strong></p>
+                            <ul class="list-unstyled">
+                                <% suggestions.forEach(suggestion => { %>
+                                    <li>
+                                        <a href="/search?q=<%= encodeURIComponent(suggestion) %>" class="text-primary">
+                                            <%= suggestion %>
+                                        </a>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        </div>
                     <% } %>
-                <% } %>
-                
-                <% for (let i = startPage; i <= endPage; i++) { %>
-                    <li class="page-item <%= currentPage === i ? 'active' : '' %>">
-                        <a class="page-link" 
-                           href="?page=<%= i %><%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">
-                            <%= i %>
-                        </a>
-                    </li>
-                <% } %>
-                
-                <% if (endPage < totalPages) { %>
-                    <% if (endPage < totalPages - 1) { %>
-                        <li class="page-item disabled">
-                            <span class="page-link">...</span>
-                        </li>
-                    <% } %>
-                    <li class="page-item">
-                        <a class="page-link" 
-                           href="?page=<%= totalPages %><%= locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '' %>">
-                            <%= totalPages %>
-                        </a>
-                    </li>
-                <% } %>
+                </div>
             <% } %>
+        </div>
+    </div>
+</div>
 
-            <% /* Next Page Button */ %>
-            <li class="page-item <%= currentPage === totalPages ? 'disabled' : '' %>">
-                <a class="page-link" 
-                   href="<%= currentPage < totalPages ? '?page=' + (currentPage + 1) + (locals.searchQuery ? '&q=' + encodeURIComponent(locals.searchQuery) : '') : '#' %>">
-                    Next &raquo;
-                </a>
-            </li>
-        </ul>
-    </nav>
-<% } %>
+<!-- ... (keep your existing HTML up to the slider section) ... -->
 
-<a href="#" class="previous">&laquo; Previous</a>
-<a href="#" class="next">Next &raquo;</a>
+<div class="container-fluid px-0">
+    <div class="cards-slider-container">
+        <div class="cards-slider" id="autoSlider">
+            <% for (let ppulist of allPpulists) { %>
+                <div class="card-slide">
+                    <a href="/ppulists/<%= ppulist._id %>" class="text-decoration-none text-dark">
+                        <div class="card h-100">
+                            <% if (ppulist.image) { %>
+                                <img
+                                    src="<%= typeof ppulist.image === 'string' ? ppulist.image : ppulist.image.url %>"
+                                    class="card-img-top object-fit-cover slider-img"
+                                    alt="<%= ppulist.title %>"
+                                    onerror="this.onerror=null; this.src='/images/default-thumbnail.jpg'; this.alt='Default image'"
+                                />
+                            <% } else { %>
+                                <div class="card-img-top d-flex align-items-center justify-content-center bg-light slider-img">
+                                    <i class="bi bi-image fs-1 text-muted"></i>
+                                </div>
+                            <% } %>
 
-<a href="#" class="previous round">&#8249;</a>
-<a href="#" class="next round">&#8250;</a>
+                            <div class="card-body">
+                                <h5 class="card-title"><%= ppulist.title %></h5>
+                                <p class="card-text text-truncate"><%= ppulist.description %></p>
+                                <div class="card-footer bg-transparent border-top-0 px-0">
+                                    <small class="text-muted">
+                                        Posted by: <%= ppulist.postedBy %><br>
+                                        <%= new Date(ppulist.time).toLocaleString() %>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            <% } %>
+        </div>
+        
+        <% if (allPpulists.length > 1) { %>
+            <button class="slider-nav slider-prev" aria-label="Previous">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <button class="slider-nav slider-next" aria-label="Next">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        <% } %>
+    </div>
+</div>
+
+<!-- Scroll to top button -->
+<button class="scroll-to-top" id="scrollToTopBtn">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Slider functionality
+        const slider = document.querySelector('.cards-slider');
+        const prevBtn = document.querySelector('.slider-prev');
+        const nextBtn = document.querySelector('.slider-next');
+        
+        if (slider && prevBtn && nextBtn) {
+            const scrollAmount = () => {
+                const card = document.querySelector('.card-slide');
+                return card ? card.offsetWidth + 15 : 300;
+            };
+            
+            nextBtn.addEventListener('click', () => {
+                slider.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+            });
+            
+            prevBtn.addEventListener('click', () => {
+                slider.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+            });
+            
+            const updateButtons = () => {
+                prevBtn.style.display = slider.scrollLeft <= 10 ? 'none' : 'flex';
+                nextBtn.style.display = slider.scrollLeft >= (slider.scrollWidth - slider.clientWidth - 10) ? 'none' : 'flex';
+            };
+            
+            slider.addEventListener('scroll', updateButtons);
+            updateButtons();
+            
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    slider.scrollBy({ left: -scrollAmount(), behavior: 'smooth' });
+                } else if (e.key === 'ArrowRight') {
+                    slider.scrollBy({ left: scrollAmount(), behavior: 'smooth' });
+                }
+            });
+            
+            window.addEventListener('resize', updateButtons);
+        }
+
+        // Auto-scroll slider from right to left
+        const autoSlider = document.getElementById('autoSlider');
+        if (autoSlider) {
+            let autoScrollInterval;
+            let isHovering = false;
+            const scrollSpeed = 1; // pixels per interval
+            const scrollIntervalTime = 300; // milliseconds
+            
+            const startAutoScroll = () => {
+                if (autoScrollInterval || isHovering) return;
+                
+                autoScrollInterval = setInterval(() => {
+                    // Check if we've reached the end
+                    if (autoSlider.scrollLeft >= (autoSlider.scrollWidth - autoSlider.clientWidth)) {
+                        // Scroll back to start instantly
+                        autoSlider.scrollTo({ left: 0, behavior: 'instant' });
+                    } else {
+                        // Scroll right
+                        autoSlider.scrollBy({ left: scrollSpeed, behavior: 'auto' });
+                    }
+                }, scrollIntervalTime);
+            };
+            
+            const stopAutoScroll = () => {
+                clearInterval(autoScrollInterval);
+                autoScrollInterval = null;
+            };
+            
+            // Start auto-scroll
+            startAutoScroll();
+            
+            // Pause on hover
+            autoSlider.addEventListener('mouseenter', () => {
+                isHovering = true;
+                stopAutoScroll();
+            });
+            
+            autoSlider.addEventListener('mouseleave', () => {
+                isHovering = false;
+                startAutoScroll();
+            });
+            
+            // Also pause when user interacts manually
+            autoSlider.addEventListener('scroll', () => {
+                if (!isHovering) {
+                    stopAutoScroll();
+                    // Restart after a delay
+                    setTimeout(startAutoScroll, 3000);
+                }
+            });
+            
+            // Handle visibility changes
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) {
+                    stopAutoScroll();
+                } else {
+                    startAutoScroll();
+                }
+            });
+        }
+
+        // Page auto-scroll functionality (removed as it conflicts with user experience)
+        
+        // Scroll to top button functionality
+        const scrollToTopBtn = document.getElementById('scrollToTopBtn');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollToTopBtn.style.display = 'flex';
+            } else {
+                scrollToTopBtn.style.display = 'none';
+            }
+        });
+        
+        scrollToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    });
+</script>

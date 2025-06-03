@@ -24,6 +24,12 @@ const ppulistSchema = new Schema({
     description: String,
     image: { url: String, filename: String },
 
+    category: {
+        type: String,
+        enum: ['Academic', 'Research', 'Event', 'Project', 'Workshop', 'Sports', 'Cultural', 'Other'],
+        default: 'Other'
+    }
+
 });
 
 

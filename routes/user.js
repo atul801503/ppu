@@ -5,6 +5,8 @@ const wrapAsync = require('../utils/wrapAsync.js');
 const passport = require('passport');
 const { isAdmin } = require('../middleware/auth.js');
 const { isLoggedIn } = require('../middleware.js');
+// const { User } = require('../user/resetpassword'); // Assuming you have a User model
+
 
 router.get("/signup", isLoggedIn, isAdmin, async(req, res) => {
     const users = await User.find({});
@@ -156,6 +158,45 @@ router.delete('/:id', isLoggedIn, isAdmin, async (req, res) => {
         console.error('Delete error:', e);
         req.flash('error', 'Failed to delete post');
         res.redirect(`/ppulists/${req.params.id}`);
+    }
+});
+
+
+// Password change route
+router.post('/change-password', async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        
+        // Check if user is authenticated (assuming you're using sessions)
+        if (!req.session.user) {
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+        
+        const userId = req.session.user.id;
+        const user = await User.findById(userId);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+        
+        // Verify current password
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            return res.status(400).json({ error: 'Current password is incorrect' });
+        }
+        
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        
+        // Update password
+        user.password = hashedPassword;
+        await user.save();
+        
+        res.json({ message: 'Password changed successfully' });
+    } catch (error) {
+        console.error('Password change error:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
 
